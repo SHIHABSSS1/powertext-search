@@ -3,14 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minute Calculator</title>
+    <title>Minute Calculator - PowerText</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .calculator-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #f1f8ff;
+            border-bottom: 1px solid #e3f2fd;
+            font-weight: 600;
+            padding: 12px 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .result-section {
+            padding: 20px 0;
+        }
+
+        .result-display {
+            background-color: #e9f7ef;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+
+        .time-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #16a085;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+
+        .btn-primary {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .btn-primary:hover {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+
+        footer {
+            margin-top: auto;
+            color: #7f8c8d;
+            border-top: 1px solid #ecf0f1;
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        /* Animation for the result */
+        @keyframes highlightResult {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .highlight {
+            animation: highlightResult 0.5s ease;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .time-display {
+                font-size: 2.5rem;
+            }
+            
+            .calculator-container {
+                padding: 0 15px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
+        <div class="nav-menu">
+            <a href="/" class="nav-link">Search Engine</a>
+            <a href="/minute-calculator" class="nav-link active">Minute Calculator</a>
+        </div>
+        
         <div class="calculator-container">
-            <h1 class="text-center mb-4">Minute Calculator</h1>
+            <h1>Minute Calculator</h1>
             
             <div class="card">
                 <div class="card-body">
@@ -105,11 +245,63 @@
         </div>
     </div>
     
-    <footer class="text-center py-3 mt-5">
-        <p>&copy; 2023 Minute Calculator</p>
+    <footer class="py-3">
+        <p>&copy; 2023 PowerText Search Engine</p>
     </footer>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputValue = document.getElementById('inputValue');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultTime = document.getElementById('resultTime');
+            const resultMinutes = document.getElementById('resultMinutes');
+            const resultSeconds = document.getElementById('resultSeconds');
+            const resultDisplay = document.querySelector('.result-display');
+            
+            // Calculate on button click
+            calculateBtn.addEventListener('click', calculateTime);
+            
+            // Also calculate when pressing Enter
+            inputValue.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    calculateTime();
+                }
+            });
+            
+            // Calculate time function
+            function calculateTime() {
+                const value = parseFloat(inputValue.value);
+                
+                if (isNaN(value)) {
+                    alert('Please enter a valid number');
+                    return;
+                }
+                
+                // Calculate using the formula (1 unit = 16:40 or 16*60+40 = 1000 seconds)
+                const totalSeconds = value * 1000;
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+                
+                // Display result
+                const timeString = formatTime(minutes, seconds);
+                resultTime.textContent = timeString;
+                resultMinutes.textContent = minutes;
+                resultSeconds.textContent = seconds;
+                
+                // Add highlight animation
+                resultDisplay.classList.remove('highlight');
+                void resultDisplay.offsetWidth; // Trigger reflow
+                resultDisplay.classList.add('highlight');
+            }
+            
+            // Format time as MM:SS
+            function formatTime(minutes, seconds) {
+                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Calculate initial value
+            calculateTime();
+        });
+    </script>
 </body>
 </html> 
