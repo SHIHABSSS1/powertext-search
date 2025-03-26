@@ -29,6 +29,31 @@
             padding: 0 1rem;
         }
 
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #4CAF50;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
         .search-container {
             background: white;
             padding: 1.5rem;
@@ -219,6 +244,11 @@
 </head>
 <body>
     <div class="container">
+        <div class="nav-menu">
+            <a href="/" class="nav-link active">Search Engine</a>
+            <a href="/minute-calculator" class="nav-link">Minute Calculator</a>
+        </div>
+        
         <div class="search-container">
             <h1>PowerText Search Engine</h1>
             <div class="search-box">

@@ -118,5 +118,9 @@ def history():
     # Return top 50 history items
     return jsonify(combined_history[:50])
 
+@app.route('/minute-calculator')
+def minute_calculator():
+    return render_template('minute_calculator.html')
+
 if __name__ == '__main__':
     app.run(debug=True) 
