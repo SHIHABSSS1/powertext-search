@@ -19,43 +19,52 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 2rem;
+            padding: 1rem;
         }
 
         .container {
             max-width: 800px;
             width: 100%;
             margin: 0 auto;
+            padding: 0 1rem;
         }
 
         .search-container {
             background: white;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         h1 {
             color: #333;
             text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
         }
 
         .search-box {
             display: flex;
+            flex-direction: column;
             gap: 1rem;
             margin-bottom: 1rem;
         }
 
+        @media (min-width: 768px) {
+            .search-box {
+                flex-direction: row;
+            }
+        }
+
         input[type="text"] {
             flex: 1;
-            padding: 1rem;
+            padding: 0.8rem;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s ease;
+            width: 100%;
         }
 
         input[type="text"]:focus {
@@ -64,7 +73,7 @@
         }
 
         button {
-            padding: 1rem 2rem;
+            padding: 0.8rem 1.5rem;
             background: #4CAF50;
             color: white;
             border: none;
@@ -72,37 +81,47 @@
             cursor: pointer;
             font-size: 1rem;
             transition: background 0.3s ease;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            button {
+                width: auto;
+            }
         }
 
         button:hover {
             background: #45a049;
         }
 
-        .results {
+        .results, .history-container {
             background: white;
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 1rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
         }
 
-        .result-item {
-            padding: 1rem;
+        .result-item, .history-item {
+            padding: 0.8rem;
             border-bottom: 1px solid #e0e0e0;
             transition: background 0.3s ease;
+            word-break: break-word;
         }
 
-        .result-item:last-child {
+        .result-item:last-child, .history-item:last-child {
             border-bottom: none;
         }
 
-        .result-item:hover {
+        .result-item:hover, .history-item:hover {
             background: #f9f9f9;
         }
 
-        .no-results {
+        .no-results, .no-history {
             text-align: center;
             color: #666;
-            padding: 2rem;
+            padding: 1.5rem;
         }
 
         .loading {
@@ -124,6 +143,73 @@
             margin-left: 10px;
         }
 
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            gap: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-radius: 8px 8px 0 0;
+            flex: 1;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .tab {
+                flex: 0 1 auto;
+                font-size: 1rem;
+            }
+        }
+
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .history-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .history-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-query {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            word-break: break-word;
+        }
+
+        .history-time {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .history-repeat {
+            color: #4CAF50;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: right;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+        }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -140,14 +226,34 @@
                 <button onclick="searchData()">Search</button>
             </div>
         </div>
+        
+        <div class="tabs">
+            <button class="tab active" id="resultsTab" onclick="showTab('results')">Results</button>
+            <button class="tab" id="historyTab" onclick="showTab('history')">History</button>
+        </div>
+        
         <div class="loading" id="loading">Searching...</div>
+        
         <div class="results" id="results"></div>
+        
+        <div class="history-container" id="historyContainer" style="display: none;">
+            <div id="history"></div>
+        </div>
     </div>
 
     <script>
         const searchInput = document.getElementById('searchInput');
         const resultsDiv = document.getElementById('results');
+        const historyDiv = document.getElementById('history');
+        const historyContainer = document.getElementById('historyContainer');
         const loadingDiv = document.getElementById('loading');
+        const resultsTab = document.getElementById('resultsTab');
+        const historyTab = document.getElementById('historyTab');
+
+        // Load history when page loads
+        window.addEventListener('load', function() {
+            loadHistory();
+        });
 
         // Search on Enter key press
         searchInput.addEventListener('keypress', function(e) {
@@ -156,12 +262,76 @@
             }
         });
 
+        function showTab(tabName) {
+            if (tabName === 'results') {
+                resultsDiv.style.display = 'block';
+                historyContainer.style.display = 'none';
+                resultsTab.classList.add('active');
+                historyTab.classList.remove('active');
+            } else if (tabName === 'history') {
+                resultsDiv.style.display = 'none';
+                historyContainer.style.display = 'block';
+                resultsTab.classList.remove('active');
+                historyTab.classList.add('active');
+                loadHistory();
+            }
+        }
+
+        function loadHistory() {
+            fetch('/history')
+                .then(response => response.json())
+                .then(data => {
+                    historyDiv.innerHTML = '';
+                    if (data.length === 0) {
+                        historyDiv.innerHTML = '<div class="no-history">No search history found</div>';
+                        return;
+                    }
+
+                    data.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        
+                        const infoDiv = document.createElement('div');
+                        infoDiv.className = 'history-info';
+                        
+                        const queryDiv = document.createElement('div');
+                        queryDiv.className = 'history-query';
+                        queryDiv.textContent = item.query;
+                        
+                        const timeDiv = document.createElement('div');
+                        timeDiv.className = 'history-time';
+                        timeDiv.textContent = `${item.timestamp} - ${item.results_count} results`;
+                        
+                        infoDiv.appendChild(queryDiv);
+                        infoDiv.appendChild(timeDiv);
+                        
+                        const repeatButton = document.createElement('span');
+                        repeatButton.className = 'history-repeat';
+                        repeatButton.textContent = 'Search Again';
+                        repeatButton.onclick = function() {
+                            searchInput.value = item.query;
+                            searchData();
+                            showTab('results');
+                        };
+                        
+                        historyItem.appendChild(infoDiv);
+                        historyItem.appendChild(repeatButton);
+                        historyDiv.appendChild(historyItem);
+                    });
+                })
+                .catch(error => {
+                    historyDiv.innerHTML = '<div class="no-history">Error loading search history</div>';
+                    console.error('Error:', error);
+                });
+        }
+
         function searchData() {
             const query = searchInput.value.trim();
             if (!query) return;
 
             loadingDiv.style.display = 'block';
             resultsDiv.innerHTML = '';
+            showTab('results');
 
             fetch(`/search?q=${encodeURIComponent(query)}`)
                 .then(response => response.json())
